@@ -1,4 +1,3 @@
-import ErrorIndicator from "./error-indicator";
-import './error-indicator.css'
+import ErrorIndicator from './error-indicator';
 
-export  default  ErrorIndicator;
+export default ErrorIndicator;

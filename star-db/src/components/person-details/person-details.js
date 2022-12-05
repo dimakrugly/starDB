@@ -2,24 +2,29 @@ import React, { Component } from 'react';
 
 import './person-details.css';
 import SwapiService from "../../services/swapi-service";
+import Spinner from "../spinner";
 
 export default class PersonDetails extends Component {
 
     swapiService = new SwapiService();
 
     state = {
-        person: null
+        person: null,
+        loading: true,
     };
 
     componentDidMount() {
         this.updatePerson();
     }
 
+
     componentDidUpdate(prevProps) {
         if (this.props.personId !== prevProps.personId) {
+            this.setState({loading: true})
             this.updatePerson();
         }
     }
+
 
     updatePerson() {
         const { personId } = this.props;
@@ -30,7 +35,7 @@ export default class PersonDetails extends Component {
         this.swapiService
             .getPerson(personId)
             .then((person) => {
-                this.setState({ person });
+                this.setState({ person, loading: false });
             });
     }
 
@@ -40,20 +45,35 @@ export default class PersonDetails extends Component {
             return <span>Select a person from a list</span>;
         }
 
-        const { id, name, gender,
-            birthYear, eyeColor } = this.state.person;
 
-        console.log(id, name, gender,
-            birthYear, eyeColor)
+        const {person, loading} = this.state;
+
+        const hasData = !loading;
+
+        const spinner = loading ? <Spinner/> : null;
+
+        const content = hasData ? <PersonView person={person}/> : null;
 
         return (
             <div className="person-details card">
+                {spinner}
+                {content}
+            </div>
+        )
+    }
+}
+
+  const   PersonView = ({person}) => {
+
+        const {id, name, gender, birthYear, eyeColor,} = person;
+
+        return (
+            <React.Fragment>
                 <img className="person-image"
                      src={`https://starwars-visualguide.com/assets/img/characters/${id}.jpg`}
                      alt="character"/>
-
                 <div className="card-body">
-                    <h4>{name} {this.props.personId}</h4>
+                    <h4>{name}</h4>
                     <ul className="list-group list-group-flush">
                         <li className="list-group-item">
                             <span className="term">Gender</span>
@@ -69,7 +89,6 @@ export default class PersonDetails extends Component {
                         </li>
                     </ul>
                 </div>
-            </div>
+            </React.Fragment>
         )
     }
-}
