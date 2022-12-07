@@ -1,65 +1,47 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 
 import ItemList from '../item-list/item-list';
-import PersonDetails from '../person-details/person-details';
-import ErrorIndicator from '../error-indicator/error-indicator';
+import ItemDetails from '../item-details/item-details';
+import SwapiService from '../../services/swapi-service';
+import Row from '../row';
+import ErrorBoundry from '../error-boundry';
 
 import './people-page.css';
-import SwapiService from "../../services/swapi-service";
-
-
-const Row = ({left, right}) => {
-    return (
-        <div className="row mb2">
-            <div className="col-md-6">
-                {left}
-            </div>
-            <div className="col-md-6">
-                {right}
-            </div>
-        </div>
-    );
-};
-
 
 export default class PeoplePage extends Component {
 
+  swapiService = new SwapiService();
 
-    swapiService = new SwapiService();
+  state = {
+    selectedPerson: 11
+  };
 
-    state = {
-        selectedPerson: 3,
-        hasError: false
-    };
+  onPersonSelected = (selectedPerson) => {
+    this.setState({ selectedPerson });
+  };
 
-    componentDidCatch(error, info) {
+  render() {
 
-        this.setState({
-            hasError: true
-        });
-    }
+    const itemList = (
+      <ItemList
+        onItemSelected={this.onPersonSelected}
+        getData={this.swapiService.getAllPeople}>
 
-    onPersonSelected = (selectedPerson) => {
-        this.setState({selectedPerson});
-    };
+        {(i) => (
+          `${i.name} (${i.birthYear})`
+        )}
 
-    render() {
+      </ItemList>
+    );
 
-        if (this.state.hasError) {
-            return <ErrorIndicator/>;
-        }
+    const personDetails = (
+      <ErrorBoundry>
+        <ItemDetails itemId={this.state.selectedPerson} />
+      </ErrorBoundry>
+    );
 
-        const itemList = (
-            <ItemList
-                onItemSelected={this.onPersonSelected}
-                getData={this.swapiService.getAllPeople}
-                renderItem={({name, gender, birthYear}) => `${name} (${gender},${birthYear})`}/>
-        )
-
-        const personDetails = <PersonDetails personId={this.state.selectedPerson}/>
-
-        return (
-            <Row left={itemList} right={personDetails}/>
-        );
-    }
+    return (
+      <Row left={itemList} right={personDetails} />
+    );
+  }
 }
